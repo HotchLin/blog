@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/blog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/blog/css/main.css">
+
+
+<link rel="stylesheet" href="/blog/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pace/1.0.2/themes/blue/pace-theme-minimal.min.css">
+  <script src="//cdnjs.cloudflare.com/ajax/libs/pace/1.0.2/pace.min.js"></script>
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/blog/',
+    scheme: 'Pisces',
+    version: '7.5.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":true},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":true,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="设计模式之代理模式   一、简介  代理模式的思路 代理模式的要点   二、实例 三、场景 参考资料    一、简介 代理模式 (Proxy) 为其他对象提供一种代理以控制对这个对象的访问。 代理模式是一种结构型模式。   代理模式的思路 Subject : 定义了 RealSubject 和 Proxy 的公共接口，这样就在任何使用 RealSubject 的地方都可以使用 Proxy 。 a">
+<meta property="og:type" content="article">
+<meta property="og:title" content="设计模式之代理模式">
+<meta property="og:url" content="https://dunwu.github.io/blog/design/pattern/%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F/index.html">
+<meta property="og:site_name" content="Dunwu">
+<meta property="og:description" content="设计模式之代理模式   一、简介  代理模式的思路 代理模式的要点   二、实例 三、场景 参考资料    一、简介 代理模式 (Proxy) 为其他对象提供一种代理以控制对这个对象的访问。 代理模式是一种结构型模式。   代理模式的思路 Subject : 定义了 RealSubject 和 Proxy 的公共接口，这样就在任何使用 RealSubject 的地方都可以使用 Proxy 。 a">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://dunwu.test.upcdn.net/snap/20200725153740.png">
+<meta property="article:published_time" content="2015-01-19T03:38:00.000Z">
+<meta property="article:modified_time" content="2020-08-13T15:32:37.068Z">
+<meta property="article:author" content="Zhang Peng">
+<meta property="article:tag" content="设计">
+<meta property="article:tag" content="设计模式">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://dunwu.test.upcdn.net/snap/20200725153740.png">
+
+<link rel="canonical" href="https://dunwu.github.io/blog/design/pattern/%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>设计模式之代理模式 | Dunwu</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/blog/atom.xml" title="Dunwu" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/blog/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Dunwu</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <h1 class="site-subtitle" itemprop="description">大道至简，知易行难</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/blog/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/blog/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/blog/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签<span class="badge">50</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/blog/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类<span class="badge">14</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/blog/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">90</span></a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/dunwu" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://dunwu.github.io/blog/blog/design/pattern/%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+      <meta itemprop="name" content="Zhang Peng">
+      <meta itemprop="description" content="Dunwu's Blog">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Dunwu">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          设计模式之代理模式<a href="https://github.com/dunwu/blog/blob/master/source/_posts/design/pattern/%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F.md" class="post-edit-link" title="编辑" rel="noopener" target="_blank"><i class="fa fa-pencil"></i></a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2015-01-19 11:38:00" itemprop="dateCreated datePublished" datetime="2015-01-19T11:38:00+08:00">2015-01-19</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-08-13 23:32:37" itemprop="dateModified" datetime="2020-08-13T23:32:37+08:00">2020-08-13</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/%E8%AE%BE%E8%AE%A1/" itemprop="url" rel="index">
+                    <span itemprop="name">设计</span>
+                  </a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/blog/categories/%E8%AE%BE%E8%AE%A1/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" itemprop="url" rel="index">
+                    <span itemprop="name">设计模式</span>
+                  </a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/blog/design/pattern/%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F/#comments" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="design/pattern/代理模式/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>6.4k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>6 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="设计模式之代理模式"><a class="markdownIt-Anchor" href="#设计模式之代理模式"></a> 设计模式之代理模式</h1>
+<!-- TOC depthFrom:2 depthTo:3 -->
+<ul>
+<li><a href="#%E4%B8%80%E7%AE%80%E4%BB%8B">一、简介</a>
+<ul>
+<li><a href="#%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F%E7%9A%84%E6%80%9D%E8%B7%AF">代理模式的思路</a></li>
+<li><a href="#%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F%E7%9A%84%E8%A6%81%E7%82%B9">代理模式的要点</a></li>
+</ul>
+</li>
+<li><a href="#%E4%BA%8C%E5%AE%9E%E4%BE%8B">二、实例</a></li>
+<li><a href="#%E4%B8%89%E5%9C%BA%E6%99%AF">三、场景</a></li>
+<li><a href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99">参考资料</a></li>
+</ul>
+<!-- /TOC -->
+<h2 id="一-简介"><a class="markdownIt-Anchor" href="#一-简介"></a> 一、简介</h2>
+<p><strong>代理模式 (Proxy)</strong> 为其他对象提供一种<strong>代理</strong>以控制对这个对象的<strong>访问</strong>。</p>
+<p>代理模式是一种<strong>结构型模式</strong>。</p>
+<p><img src="http://dunwu.test.upcdn.net/snap/20200725153740.png" alt="img" /></p>
+<h3 id="代理模式的思路"><a class="markdownIt-Anchor" href="#代理模式的思路"></a> 代理模式的思路</h3>
+<p><strong>Subject</strong> : 定义了 RealSubject 和 Proxy 的公共接口，这样就在任何使用 RealSubject 的地方都可以使用 Proxy 。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">Subject</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title">Request</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>RealSubject</strong> : 定义 Proxy 所代表的真实实体。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">RealSubject</span> <span class="keyword">extends</span> <span class="title">Subject</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">Request</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">"真实的请求"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>Proxy</strong> : 保存一个引用使得代理可以访问实体，并提供一个与 Subject 的接口相同的接口，这样代理就可以用来替代实体。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Proxy</span> <span class="keyword">extends</span> <span class="title">Subject</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> RealSubject real;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">Request</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">null</span> == real) &#123;</span><br><span class="line">            real = <span class="keyword">new</span> RealSubject();</span><br><span class="line">        &#125;</span><br><span class="line">        real.Request();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="代理模式的要点"><a class="markdownIt-Anchor" href="#代理模式的要点"></a> 代理模式的要点</h3>
+<ul>
+<li>代理模式介绍了一种访问对象的间接等级。</li>
+<li>一个远程代理可以隐藏一个对象在不同地址空间的细节。</li>
+<li>一个虚拟代理可以根据需要最优化创建对象的开销。</li>
+<li>而安全代理和智能指引都允许访问对象的同时处理其他事务。</li>
+</ul>
+<h2 id="二-实例"><a class="markdownIt-Anchor" href="#二-实例"></a> 二、实例</h2>
+<h3 id="注解反射代理消除重复代码"><a class="markdownIt-Anchor" href="#注解反射代理消除重复代码"></a> 注解+反射+代理消除重复代码</h3>
+<p>假设银行提供了一些 API 接口，对参数的序列化有点特殊，不使用 JSON，而是需要我们把参数依次拼在一起构成一个大字符串。</p>
+<p>按照银行提供的 API 文档的顺序，把所有参数构成定长的数据，然后拼接在一起作为整个字符串。因为每一种参数都有固定长度，未达到长度时需要做填充处理：</p>
+<ul>
+<li>字符串类型的参数不满长度部分需要以下划线右填充，也就是字符串内容靠左；</li>
+<li>数字类型的参数不满长度部分以 0 左填充，也就是实际数字靠右；</li>
+<li>货币类型的表示需要把金额向下舍入 2 位到分，以分为单位，作为数字类型同样进行<br />
+左填充。</li>
+</ul>
+<p>对所有参数做 MD5 操作作为签名（为了方便理解，Demo 中不涉及加盐处理）。</p>
+<h4 id="问题版本"><a class="markdownIt-Anchor" href="#问题版本"></a> 问题版本</h4>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> org.apache.commons.codec.digest.DigestUtils;</span><br><span class="line"><span class="keyword">import</span> org.apache.http.client.fluent.Request;</span><br><span class="line"><span class="keyword">import</span> org.apache.http.entity.ContentType;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> java.math.BigDecimal;</span><br><span class="line"><span class="keyword">import</span> java.math.RoundingMode;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BankService</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">createUser</span><span class="params">(String name, String identity, String mobile, <span class="keyword">int</span> age)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        StringBuilder stringBuilder = <span class="keyword">new</span> StringBuilder();</span><br><span class="line">        <span class="comment">//字符串靠左，多余的地方_填充</span></span><br><span class="line">        stringBuilder.append(String.format(<span class="string">"%-10s"</span>, name).replace(<span class="string">' '</span>, <span class="string">'_'</span>));</span><br><span class="line">        <span class="comment">//字符串靠左，多余的地方_填充</span></span><br><span class="line">        stringBuilder.append(String.format(<span class="string">"%-18s"</span>, identity).replace(<span class="string">' '</span>, <span class="string">'_'</span>));</span><br><span class="line">        <span class="comment">//数字靠右，多余的地方用0填充</span></span><br><span class="line">        stringBuilder.append(String.format(<span class="string">"%05d"</span>, age));</span><br><span class="line">        <span class="comment">//字符串靠左，多余的地方_填充</span></span><br><span class="line">        stringBuilder.append(String.format(<span class="string">"%-11s"</span>, mobile).replace(<span class="string">' '</span>, <span class="string">'_'</span>));</span><br><span class="line">        <span class="comment">//最后加上MD5作为签名</span></span><br><span class="line">        stringBuilder.append(DigestUtils.md2Hex(stringBuilder.toString()));</span><br><span class="line">        <span class="keyword">return</span> Request.Post(<span class="string">"http://localhost:45678/reflection/bank/createUser"</span>)</span><br><span class="line">                .bodyString(stringBuilder.toString(), ContentType.APPLICATION_JSON)</span><br><span class="line">                .execute().returnContent().asString();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">pay</span><span class="params">(<span class="keyword">long</span> userId, BigDecimal amount)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        StringBuilder stringBuilder = <span class="keyword">new</span> StringBuilder();</span><br><span class="line">        <span class="comment">//数字靠右，多余的地方用0填充</span></span><br><span class="line">        stringBuilder.append(String.format(<span class="string">"%020d"</span>, userId));</span><br><span class="line">        <span class="comment">//金额向下舍入2位到分，以分为单位，作为数字靠右，多余的地方用0填充</span></span><br><span class="line">        stringBuilder.append(String.format(<span class="string">"%010d"</span>, amount.setScale(<span class="number">2</span>, RoundingMode.DOWN).multiply(<span class="keyword">new</span> BigDecimal(<span class="string">"100"</span>)).longValue()));</span><br><span class="line">        <span class="comment">//最后加上MD5作为签名</span></span><br><span class="line">        stringBuilder.append(DigestUtils.md2Hex(stringBuilder.toString()));</span><br><span class="line">        <span class="keyword">return</span> Request.Post(<span class="string">"http://localhost:45678/reflection/bank/pay"</span>)</span><br><span class="line">                .bodyString(stringBuilder.toString(), ContentType.APPLICATION_JSON)</span><br><span class="line">                .execute().returnContent().asString();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在以上的代码版本中，存在以下问题：</p>
+<ul>
+<li>三种标准数据类型的处理逻辑有重复，稍有不慎就会出现 Bug；</li>
+<li>处理流程中字符串拼接、加签和发请求的逻辑，在所有方法重复；</li>
+<li>实际方法的入参的参数类型和顺序，不一定和接口要求一致，容易出错；</li>
+<li>代码层面针对每一个参数硬编码，无法清晰地进行核对，如果参数达到几十个、上百个，出错的概率极大。</li>
+</ul>
+<h4 id="优化版本"><a class="markdownIt-Anchor" href="#优化版本"></a> 优化版本</h4>
+<p>针对上面代码版本中的问题，可以使用 <strong>注解+反射+代理模式</strong> 解决重复代码。</p>
+<p>【注解一】</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> java.lang.annotation.*;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Retention</span>(RetentionPolicy.RUNTIME)</span><br><span class="line"><span class="meta">@Target</span>(ElementType.TYPE)</span><br><span class="line"><span class="meta">@Documented</span></span><br><span class="line"><span class="meta">@Inherited</span></span><br><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> BankAPI &#123;</span><br><span class="line"></span><br><span class="line">    <span class="function">String <span class="title">desc</span><span class="params">()</span> <span class="keyword">default</span> ""</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function">String <span class="title">url</span><span class="params">()</span> <span class="keyword">default</span> ""</span>;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>【注解二】</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> java.lang.annotation.*;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Retention</span>(RetentionPolicy.RUNTIME)</span><br><span class="line"><span class="meta">@Target</span>(ElementType.FIELD)</span><br><span class="line"><span class="meta">@Documented</span></span><br><span class="line"><span class="meta">@Inherited</span></span><br><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> BankAPIField &#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">order</span><span class="params">()</span> <span class="keyword">default</span> -1</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">length</span><span class="params">()</span> <span class="keyword">default</span> -1</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function">String <span class="title">type</span><span class="params">()</span> <span class="keyword">default</span> ""</span>;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>【抽象类】</p>
+<figure class="highlight angelscript"><table><tr><td class="code"><pre><span class="line"><span class="keyword">abstract</span> <span class="keyword">class</span> <span class="symbol">AbstractAPI</span> &#123;&#125;</span><br></pre></td></tr></table></figure>
+<p>【代理类】</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Slf</span>4j</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BetterBankService</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">createUser</span><span class="params">(String name, String identity, String mobile, <span class="keyword">int</span> age)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        CreateUserAPI createUserAPI = <span class="keyword">new</span> CreateUserAPI();</span><br><span class="line">        createUserAPI.setName(name);</span><br><span class="line">        createUserAPI.setIdentity(identity);</span><br><span class="line">        createUserAPI.setAge(age);</span><br><span class="line">        createUserAPI.setMobile(mobile);</span><br><span class="line">        <span class="keyword">return</span> remoteCall(createUserAPI);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">pay</span><span class="params">(<span class="keyword">long</span> userId, BigDecimal amount)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        PayAPI payAPI = <span class="keyword">new</span> PayAPI();</span><br><span class="line">        payAPI.setUserId(userId);</span><br><span class="line">        payAPI.setAmount(amount);</span><br><span class="line">        <span class="keyword">return</span> remoteCall(payAPI);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> String <span class="title">remoteCall</span><span class="params">(AbstractAPI api)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        <span class="comment">//从BankAPI注解获取请求地址</span></span><br><span class="line">        BankAPI bankAPI = api.getClass().getAnnotation(BankAPI<span class="class">.<span class="keyword">class</span>)</span>;</span><br><span class="line">        bankAPI.url();</span><br><span class="line">        StringBuilder stringBuilder = <span class="keyword">new</span> StringBuilder();</span><br><span class="line">        Arrays.stream(api.getClass().getDeclaredFields()) <span class="comment">//获得所有字段</span></span><br><span class="line">            .filter(field -&gt; field.isAnnotationPresent(BankAPIField<span class="class">.<span class="keyword">class</span>)) //查找标记了注解的字段</span></span><br><span class="line"><span class="class">            .<span class="title">sorted</span>(<span class="title">Comparator</span>.<span class="title">comparingInt</span>(<span class="title">a</span> -&gt; <span class="title">a</span>.<span class="title">getAnnotation</span>(<span class="title">BankAPIField</span>.<span class="title">class</span>).<span class="title">order</span>())) //根据注解中的<span class="title">order</span>对字段排序</span></span><br><span class="line"><span class="class">            .<span class="title">peek</span>(<span class="title">field</span> -&gt; <span class="title">field</span>.<span class="title">setAccessible</span>(<span class="title">true</span>)) //设置可以访问私有字段</span></span><br><span class="line"><span class="class">            .<span class="title">forEach</span>(<span class="title">field</span> -&gt; </span>&#123;</span><br><span class="line">                <span class="comment">//获得注解</span></span><br><span class="line">                BankAPIField bankAPIField = field.getAnnotation(BankAPIField<span class="class">.<span class="keyword">class</span>)</span>;</span><br><span class="line">                Object value = <span class="string">""</span>;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    <span class="comment">//反射获取字段值</span></span><br><span class="line">                    value = field.get(api);</span><br><span class="line">                &#125; <span class="keyword">catch</span> (IllegalAccessException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="comment">//根据字段类型以正确的填充方式格式化字符串</span></span><br><span class="line">                <span class="keyword">switch</span> (bankAPIField.type()) &#123;</span><br><span class="line">                    <span class="keyword">case</span> <span class="string">"S"</span>: &#123;</span><br><span class="line">                        stringBuilder.append(</span><br><span class="line">                            String.format(<span class="string">"%-"</span> + bankAPIField.length() + <span class="string">"s"</span>, value.toString()).replace(<span class="string">' '</span>, <span class="string">'_'</span>));</span><br><span class="line">                        <span class="keyword">break</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="keyword">case</span> <span class="string">"N"</span>: &#123;</span><br><span class="line">                        stringBuilder.append(</span><br><span class="line">                            String.format(<span class="string">"%"</span> + bankAPIField.length() + <span class="string">"s"</span>, value.toString()).replace(<span class="string">' '</span>, <span class="string">'0'</span>));</span><br><span class="line">                        <span class="keyword">break</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="keyword">case</span> <span class="string">"M"</span>: &#123;</span><br><span class="line">                        <span class="keyword">if</span> (!(value <span class="keyword">instanceof</span> BigDecimal)) &#123;</span><br><span class="line">                            <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(</span><br><span class="line">                                String.format(<span class="string">"&#123;&#125; 的 &#123;&#125; 必须是BigDecimal"</span>, api, field));</span><br><span class="line">                        &#125;</span><br><span class="line">                        stringBuilder.append(String.format(<span class="string">"%0"</span> + bankAPIField.length() + <span class="string">"d"</span>,</span><br><span class="line">                            ((BigDecimal) value).setScale(<span class="number">2</span>, RoundingMode.DOWN)</span><br><span class="line">                                .multiply(<span class="keyword">new</span> BigDecimal(<span class="string">"100"</span>))</span><br><span class="line">                                .longValue()));</span><br><span class="line">                        <span class="keyword">break</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="keyword">default</span>:</span><br><span class="line">                        <span class="keyword">break</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;);</span><br><span class="line">        <span class="comment">//签名逻辑</span></span><br><span class="line">        stringBuilder.append(DigestUtils.md2Hex(stringBuilder.toString()));</span><br><span class="line">        String param = stringBuilder.toString();</span><br><span class="line">        <span class="keyword">long</span> begin = System.currentTimeMillis();</span><br><span class="line">        <span class="comment">//发请求</span></span><br><span class="line">        String result = Request.Post(<span class="string">"http://localhost:45678/reflection"</span> + bankAPI.url())</span><br><span class="line">            .bodyString(param, ContentType.APPLICATION_JSON)</span><br><span class="line">            .execute().returnContent().asString();</span><br><span class="line">        log.info(<span class="string">"调用银行API &#123;&#125; url:&#123;&#125; 参数:&#123;&#125; 耗时:&#123;&#125;ms"</span>, bankAPI.desc(), bankAPI.url(), param,</span><br><span class="line">            System.currentTimeMillis() - begin);</span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>【注解修饰的 API 接口一】</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> lombok.Data;</span><br><span class="line"></span><br><span class="line"><span class="meta">@BankAPI</span>(url = <span class="string">"/bank/createUser"</span>, desc = <span class="string">"创建用户接口"</span>)</span><br><span class="line"><span class="meta">@Data</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CreateUserAPI</span> <span class="keyword">extends</span> <span class="title">AbstractAPI</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@BankAPIField</span>(order = <span class="number">1</span>, type = <span class="string">"S"</span>, length = <span class="number">10</span>)</span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    <span class="meta">@BankAPIField</span>(order = <span class="number">2</span>, type = <span class="string">"S"</span>, length = <span class="number">18</span>)</span><br><span class="line">    <span class="keyword">private</span> String identity;</span><br><span class="line">    <span class="meta">@BankAPIField</span>(order = <span class="number">4</span>, type = <span class="string">"S"</span>, length = <span class="number">11</span>)</span><br><span class="line">    <span class="keyword">private</span> String mobile;</span><br><span class="line">    <span class="meta">@BankAPIField</span>(order = <span class="number">3</span>, type = <span class="string">"N"</span>, length = <span class="number">5</span>)</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> age;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>【注解修饰的 API 接口二】</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> lombok.Data;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.math.BigDecimal;</span><br><span class="line"></span><br><span class="line"><span class="meta">@BankAPI</span>(url = <span class="string">"/bank/pay"</span>, desc = <span class="string">"支付接口"</span>)</span><br><span class="line"><span class="meta">@Data</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PayAPI</span> <span class="keyword">extends</span> <span class="title">AbstractAPI</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@BankAPIField</span>(order = <span class="number">1</span>, type = <span class="string">"N"</span>, length = <span class="number">20</span>)</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">long</span> userId;</span><br><span class="line">    <span class="meta">@BankAPIField</span>(order = <span class="number">2</span>, type = <span class="string">"M"</span>, length = <span class="number">10</span>)</span><br><span class="line">    <span class="keyword">private</span> BigDecimal amount;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="三-场景"><a class="markdownIt-Anchor" href="#三-场景"></a> 三、场景</h2>
+<ul>
+<li><strong>远程代理</strong>：为一个远程对象在不同地址空间提供本地化代表。</li>
+<li><strong>虚拟代理</strong>：根据需要创建开销很大的对象。通过它来存放实例化需要很长时间的真实对象。</li>
+<li><strong>安全代理</strong>：用来控制真实对象的访问权限。</li>
+<li><strong>智能指引</strong>：是指当调用真实对象时，代理处理另外一些事。</li>
+</ul>
+<h2 id="参考资料"><a class="markdownIt-Anchor" href="#参考资料"></a> 参考资料</h2>
+<ul>
+<li><a href="https://item.jd.com/10100236.html" target="_blank" rel="noopener">《O’Reilly：Head First 设计模式》</a></li>
+<li><a href="https://item.jd.com/10079261.html" target="_blank" rel="noopener">《大话设计模式》</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Zhang Peng
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://dunwu.github.io/blog/design/pattern/%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F/" title="设计模式之代理模式">https://dunwu.github.io/blog/design/pattern/%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/blog/tags/%E8%AE%BE%E8%AE%A1/" rel="tag"># 设计</a>
+              <a href="/blog/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag"># 设计模式</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/blog/design/pattern/%E4%BA%AB%E5%85%83%E6%A8%A1%E5%BC%8F/" rel="next" title="设计模式之享元模式">
+                  <i class="fa fa-chevron-left"></i> 设计模式之享元模式
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+                <a href="/blog/design/pattern/%E5%A4%96%E8%A7%82%E6%A8%A1%E5%BC%8F/" rel="prev" title="设计模式之外观模式">
+                  设计模式之外观模式 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    
+  <div class="comments" id="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#设计模式之代理模式"><span class="nav-text"> 设计模式之代理模式</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#一-简介"><span class="nav-text"> 一、简介</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#代理模式的思路"><span class="nav-text"> 代理模式的思路</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#代理模式的要点"><span class="nav-text"> 代理模式的要点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二-实例"><span class="nav-text"> 二、实例</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#注解反射代理消除重复代码"><span class="nav-text"> 注解+反射+代理消除重复代码</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#问题版本"><span class="nav-text"> 问题版本</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#优化版本"><span class="nav-text"> 优化版本</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#三-场景"><span class="nav-text"> 三、场景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考资料"><span class="nav-text"> 参考资料</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <img class="site-author-image" itemprop="image" alt="Zhang Peng"
+    src="/blog/images/avatar.gif">
+  <p class="site-author-name" itemprop="name">Zhang Peng</p>
+  <div class="site-description" itemprop="description">Dunwu's Blog</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/blog/archives/">
+        
+          <span class="site-state-item-count">90</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/blog/categories/">
+          
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/blog/tags/">
+          
+        <span class="site-state-item-count">50</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/dunwu" title="GitHub &amp;rarr; https:&#x2F;&#x2F;github.com&#x2F;dunwu" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:forbreak@163.com" title="E-Mail &amp;rarr; mailto:forbreak@163.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" class="cc-opacity" rel="noopener" target="_blank"><img src="/blog/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 2015 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-paper-plane"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zhang Peng</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    <span title="站点总字数">477k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">7:14</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="//cdn.jsdelivr.net/gh/theme-next/theme-next-canvas-nest@1/canvas-nest.min.js"></script>
+  <script src="/blog/lib/anime.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.min.js"></script>
+  <script src="/blog/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/blog/js/utils.js"></script>
+
+<script src="/blog/js/motion.js"></script>
+
+
+<script src="/blog/js/schemes/pisces.js"></script>
+
+
+<script src="/blog/js/next-boot.js"></script>
+
+<script src="/blog/js/bookmark.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/blog/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://blog-ajay4qmfci.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  function loadComments() {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: {page: {
+            url: "https://dunwu.github.io/blog/design/pattern/%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F/",
+            identifier: "design/pattern/代理模式/",
+            title: "设计模式之代理模式"
+          }
+        }
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://blog-ajay4qmfci.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  }
+    (function() {
+      var offsetTop = document.getElementById('comments').offsetTop - window.innerHeight;
+      if (offsetTop <= 0) {
+        // load directly when there's no a scrollbar
+        window.addEventListener('load', loadComments, false);
+      } else {
+        var disqus_scroll = () => {
+          // offsetTop may changes because of manually resizing browser window or lazy loading images.
+          var offsetTop = document.getElementById('comments').offsetTop - window.innerHeight;
+          var scrollTop = window.scrollY;
+
+          // pre-load comments a bit? (margin or anything else)
+          if (offsetTop - scrollTop < 60) {
+            window.removeEventListener('scroll', disqus_scroll);
+            loadComments();
+          }
+        };
+        window.addEventListener('scroll', disqus_scroll);
+      }
+    })();
+  
+</script>
+
+</body>
+</html>
